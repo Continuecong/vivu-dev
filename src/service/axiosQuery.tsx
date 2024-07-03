@@ -1,11 +1,13 @@
-import { BaseQueryFn } from "@reduxjs/toolkit/query";
+import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 
 import type { AxiosError, AxiosRequestConfig } from "axios";
 import axios from "axios";
 
-// import { getItem, setItem } from "../helper/storage";
+import { getItem, setItem } from "@/helper/storage";
 
-export const BASE_URL = import.meta.env.NEXT_PUBLIC_APP_URL;
+import nextConfig from "../../next.config.mjs";
+
+export const BASE_URL = nextConfig.basePath;
 
 // axios.defaults.headers.common['Authorization'] = 'Bearer token_expired';
 
@@ -19,6 +21,7 @@ axiosInstance.interceptors.request.use(
 
     if (token) {
       const skipEndpoints = ["/register", "/refresh-token"];
+
       if (!skipEndpoints.some((url) => config?.url?.includes(url))) {
         config.headers["Authorization"] = `Bearer ${token}`;
       }
@@ -43,6 +46,7 @@ axiosInstance.interceptors.response.use(
       setItem("access_token", response.data.access_token);
       setItem("refresh_token", response.data.refresh_token);
     }
+
     return response.data;
   },
   async (error) => {
@@ -52,8 +56,11 @@ axiosInstance.interceptors.response.use(
     if (!error.response) {
       return Promise.reject(error);
     }
+
     const originalRequest = error.config;
+
     // Trường hợp lỗi token hết hạn
+
     if (
       error.response.status === 401 &&
       !originalRequest._retry &&
@@ -61,12 +68,15 @@ axiosInstance.interceptors.response.use(
     ) {
       originalRequest._retry = true;
       const refreshToken = getItem("refresh_token") as string;
+
       console.log("Bắt đầu refresh token");
+
       try {
         await axiosInstance.post("/auth/refresh-token", {
           refresh_token: refreshToken,
         });
         console.log("Refresh token thành công");
+
         return await axiosInstance({
           url: originalRequest.url,
           method: originalRequest.method,
@@ -106,9 +116,11 @@ const axiosBaseQuery =
         params,
         headers,
       });
+
       return { data: result };
     } catch (axiosError) {
       const err = axiosError as AxiosError;
+
       return {
         error: {
           status: err.response?.status,
