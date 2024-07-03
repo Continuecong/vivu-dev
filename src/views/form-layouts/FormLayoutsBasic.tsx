@@ -4,22 +4,24 @@
 import { useState } from 'react'
 
 // Next Imports
-import Link from 'next/link'
 
 // MUI Imports
+import dynamic from 'next/dynamic'
+
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 
-import Typography from '@mui/material/Typography'
 
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 
-import CustomEditor from '@/components/ckeditor/custom-editor'
+
+
+const CustomEditor = dynamic( () => import( '@/components/ckeditor/custom-editor' ), { ssr: false } );
 
 const FormLayoutsBasic = () => {
   // States
